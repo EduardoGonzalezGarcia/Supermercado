@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity{
                             MainActivity.this.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    textViewResultado.setText(tex);
+                                    textViewResultado.setText(tex);//
                                 }
                             });
                         }
