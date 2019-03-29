@@ -10,6 +10,7 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -23,6 +24,9 @@ public class MainActivity extends AppCompatActivity{
     Context context;
     LayoutParams layoutparams;
     TextView textview;
+
+    ArrayList<Producto> productos = new ArrayList<Producto>();
+    int nProductos = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +68,7 @@ public class MainActivity extends AppCompatActivity{
                             MainActivity.this.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    textViewResultado.setText(tex);//
+                                    textViewResultado.setText(tex);
                                 }
                             });
                         }
@@ -78,16 +82,51 @@ public class MainActivity extends AppCompatActivity{
 
     public String obtenerListaProductos(String str){
         String lista = "";
-        for(int i=40;i<str.length()-4;i++){
-            if(str.charAt(i)=='s' && str.charAt(i+1)=='o' && str.charAt(i+2)=='l' && str.charAt(i+3)=='d'){
-                for(int j=i+10;j<str.length()-3;j++){
-                    if(str.charAt(j)=='<' && str.charAt(j+1)=='/'){
-                        lista=lista.concat(str.substring(i+10,j)+"\n");
-                        if(str.charAt(j+74)=='o') {
-                            lista = lista.concat(str.substring(j + 77, j + 81) + "€\n\n");
+        StringBuilder sb = new StringBuilder();
+        int acaba = str.length()-25000; //TESTEAR EL NUMERO
+
+        for(int i=30000;i<acaba;i++){ // Leer el HTML
+            if(str.charAt(i+2)=='l' && str.charAt(i+3)=='d' && str.charAt(i+4)=='-' && str.charAt(i+5)=='o'){
+                for(int j=i+10;j<acaba;j++){ // Leer el nombre del producto
+                    if(str.charAt(j)=='&'){
+                        sb.append('"');
+                        j=j+5;
+                    } else {
+                        sb.append(str.charAt(j));
+                    }
+                    if(str.charAt(j+1)=='<' && str.charAt(j+2)=='/'){
+                        productos.add(new Producto(sb.toString(),"",""));
+                        nProductos++;
+                        sb.delete(0,sb.length());
+                        if(str.charAt(j+75)=='o') {
+                            for(int k=j+78;k<acaba;k++){ // Leer el precio
+                                if(str.charAt(k)!=' '){
+                                    sb.append(str.charAt(k));
+                                }else{
+                                    productos.get(nProductos-1).setPrecioString(sb.toString());
+                                    sb.delete(0,sb.length());
+                                    break;
+                                }
+                            }
                         }else{
-                            lista = lista.concat(str.substring(j + 130, j + 134) + "€\n\n");
+                            boolean encontrado=false;
+                            for(int k=j+125;k<acaba;k++){ // Leer el precio rebajado
+                                if(str.charAt(k)=='>' || encontrado){
+                                    if(!encontrado) {
+                                        encontrado = true;
+                                        k++;
+                                    }
+                                    if (str.charAt(k) != ' ') {
+                                        sb.append(str.charAt(k));
+                                    } else {
+                                        productos.get(nProductos-1).setPrecioString(sb.toString());
+                                        sb.delete(0,sb.length());
+                                        break;
+                                    }
+                                }
+                            }
                         }
+                        sb.delete(0,sb.length());
                         i=j+81;
                         break;
                     }
@@ -95,7 +134,15 @@ public class MainActivity extends AppCompatActivity{
 
             }
         }
+
+        //ESTE BLOQUE SERA ELIMINADO CUANDO SE AVANCE
+        for(int i=0; i<productos.size();i++){
+            lista=lista+productos.get(i).getNombre()+" "+productos.get(i).getPrecioString()+"€\n";
+        }
+        productos.clear();
+        nProductos=0;
         return lista;
+        /////////////////////////////////////////////
     }
 
 
