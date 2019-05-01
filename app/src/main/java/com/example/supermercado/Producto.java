@@ -6,15 +6,17 @@ public class Producto {
     int precio;
     String precioString;
     String descripcion;
+    String tienda;
 
 
     public Producto() { }
 
-    public Producto(String nombre, String precioString, String descripcion) {
+    public Producto(String nombre, String precioString, String tienda, String descripcion) {
         this.nombre = nombre;
         //this.precio = Integer.parseInt(precioString);
         this.precioString = precioString;
         this.descripcion = descripcion;
+        this.tienda = tienda;
     }
 
     public String getNombre() {
@@ -25,12 +27,8 @@ public class Producto {
         this.nombre = nombre;
     }
 
-    public int getPrecio() {
-        return precio;
-    }
-
-    public void setPrecio(int precio) {
-        this.precio = precio;
+    public String getTienda() {
+        return tienda;
     }
 
     public String getPrecioString() {
