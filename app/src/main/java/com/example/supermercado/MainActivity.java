@@ -1,16 +1,34 @@
 package com.example.supermercado;
 
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
+import android.support.v7.widget.Toolbar;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import java.io.IOException;
@@ -28,19 +46,47 @@ public class MainActivity extends AppCompatActivity{
     Context context;
     LayoutParams layoutparams;
     TextView textview;
+    static TextView textViewNProductos;
 
     ArrayList<Producto> productosCarrefour = new ArrayList<Producto>();
     ArrayList<Producto> productosAlcampo = new ArrayList<Producto>();
     ArrayList<Producto> productosEroski = new ArrayList<Producto>();
+    public static ArrayList<Producto> cesta = new ArrayList<Producto>();
+    public static Integer nProductosCesta = 0;
+
     int nlistasLlenas = 0;
     int nProductos = 0;
     int nProductosAlcampo = 0;
     int nProductosEroski = 0;
 
+
+    public ArrayList<Producto> getCesta() {
+        return cesta;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setTitle("Buscador de productos");
+
+        textViewNProductos = (TextView) findViewById(R.id.textViewNProductos);
+        textViewNProductos.setText(nProductosCesta.toString());
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.bringToFront();
+
+
+
 
         context = getApplicationContext();
 
@@ -62,8 +108,8 @@ public class MainActivity extends AppCompatActivity{
                     final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar);
                     progressBar.setMax(10);
                     progressBar.setProgress(0);
+                    progressBar.bringToFront();
                     progressBar.setVisibility(View.VISIBLE);
-
 
                     productosCarrefour.clear();
                     productosAlcampo.clear();
@@ -99,12 +145,13 @@ public class MainActivity extends AppCompatActivity{
                                 nlistasLlenas++;
                                 progressBar.setProgress(nlistasLlenas*3+1);
                                 if(nlistasLlenas == 3) {
-                                    final String texto = recorrerListas();
+                                    //final String texto = recorrerListas();
                                     MainActivity.this.runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
                                             progressBar.setVisibility(View.GONE);
-                                            textViewResultado.setText(texto);
+                                            crearCartas();
+                                            //textViewResultado.setText(texto);
                                         }
                                     });
                                 }
@@ -133,12 +180,13 @@ public class MainActivity extends AppCompatActivity{
                                 nlistasLlenas++;
                                 progressBar.setProgress(nlistasLlenas*3+1);
                                 if(nlistasLlenas == 3) {
-                                    final String texto = recorrerListas();
+                                    //final String texto = recorrerListas();
                                     MainActivity.this.runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
                                             progressBar.setVisibility(View.GONE);
-                                            textViewResultado.setText(texto);
+                                            crearCartas();
+                                            //textViewResultado.setText(texto);
                                         }
                                     });
                                 }
@@ -165,12 +213,13 @@ public class MainActivity extends AppCompatActivity{
                                 nlistasLlenas++;
                                 progressBar.setProgress(nlistasLlenas*3+1);
                                 if(nlistasLlenas == 3) {
-                                    final String texto = recorrerListas();
+                                    //final String texto = recorrerListas();
                                     MainActivity.this.runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
                                             progressBar.setVisibility(View.GONE);
-                                            textViewResultado.setText(texto);
+                                            crearCartas();
+                                            //textViewResultado.setText(texto);
                                         }
                                     });
                                 }
@@ -335,9 +384,184 @@ public class MainActivity extends AppCompatActivity{
         return lista;
     }
 
+    private void crearCartas(){
+        RelativeLayout layout = (RelativeLayout)findViewById(R.id.layoutProductos);
+        ScrollView scroll = (ScrollView)findViewById(R.id.scrollViewProductos);
+        layout.removeAllViews();
+        scroll.setScrollY(0);
+        int nProductos = 0;
+        for(int i=0; i<40 && nProductos<20; i=i+3){
+            if (nProductos < productosCarrefour.size()){
+                CreateCardViewProgrammatically(500*nProductos,"Carrefour");
+                nProductos++;
+            }
+            if (nProductos < productosEroski.size()){
+                CreateCardViewProgrammatically(500*nProductos,"Eroski");
+                nProductos++;
+            }
+            if (nProductos < productosAlcampo.size()){
+                CreateCardViewProgrammatically(500*nProductos,"Alcampo");
+                nProductos++;
+            }
+        }
+    }
+
+    public void CreateCardViewProgrammatically(int pos, String supermarket){
+        final Producto producto;
+        int index = pos/500;
+
+        if(supermarket.equals("Carrefour")){
+            producto = productosCarrefour.get(index);
+        }else if(supermarket.equals("Eroski")){
+            producto = productosEroski.get(index);
+        }else{
+            producto = productosAlcampo.get(index);
+        }
+        String name = producto.getNombre();
+        String precio = producto.getPrecioString();
+
+        //CARDVIEW
+        RelativeLayout layout = (RelativeLayout)findViewById(R.id.layoutProductos);
+        CardView cardview = new CardView(context);
+        layoutparams = new LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        layoutparams.setMargins(17,11+pos,17,15);
+        layoutparams.height = 500;
+        cardview.setLayoutParams(layoutparams);
+        cardview.setUseCompatPadding(true);
+
+        //IMAGEN LOGO
+        Drawable logo = context.getResources().getDrawable(context.getResources().getIdentifier(supermarket.toLowerCase()+"logo", "drawable", context.getPackageName()));
+        ImageView logoview = new ImageView(context);
+        logoview.setImageDrawable(logo);
+        logoview.setPadding(0,300,700,0);
+        LayoutParams layoutparams2 = new LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        layoutparams2.setMargins(30,0,0,58);
+        layoutparams2.height = 500;
+        logoview.setLayoutParams(layoutparams2);
+
+        //IMAGEN PLACEHOLDER
+        Drawable placeholder = context.getResources().getDrawable(context.getResources().getIdentifier("placeholder", "drawable", context.getPackageName()));
+        ImageView placeholderview = new ImageView(context);
+        placeholderview.setImageDrawable(placeholder);
+        placeholderview.setPadding(0,0,700,200);
+        LayoutParams layoutparams1 = new LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        layoutparams1.setMargins(20,20,0,0);
+        layoutparams1.height = 500;
+        placeholderview.setLayoutParams(layoutparams1);
+
+        //TITULO PRODUCTO
+        textview = new TextView(context);
+        textview.setText(name);
+        textview.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
+        //textview.setTextColor(0x3f95a2);
+        textview.setTypeface(null, Typeface.BOLD);
+        textview.setPadding(370,25,25,0);
+        textview.setMaxLines(5);
+
+        //PRECIO
+        TextView precioview = new TextView(context);
+        precioview.setText(precio+"€");
+        precioview.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 24);
+        precioview.setTextColor(Color.BLACK);
+        precioview.setTypeface(null, Typeface.BOLD);
+        precioview.setPadding(250,335,230,30);
+        precioview.setGravity(Gravity.CENTER);
+
+        /*
+        //CANTIDAD
+        EditText cantidadtext = new EditText(context);
+        cantidadtext.setText("1");
+        cantidadtext.setBackgroundColor(Color.rgb(229, 229, 229));
+        LayoutParams layoutparams4 = new LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        //layoutparams4.setMargins(100,100,100,100);
+        layoutparams4.width = 200;
+        layoutparams4.height = 200;
+        cantidadtext.setLayoutParams(layoutparams4);
+        cantidadtext.bringToFront();
+        */
+
+        //BOTON
+        Button boton = new Button(context);
+        LayoutParams layoutparams3 = new LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        layoutparams3.height = 90;
+        layoutparams3.width = 300;
+        layoutparams3.setMargins(700,350,30,25);
+        boton.setLayoutParams(layoutparams3);
+        boton.setText("Añadir");
+        boton.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10);
+        boton.setTextColor(Color.WHITE);
+        boton.setTypeface(null, Typeface.BOLD);
+        boton.setBackgroundColor(Color.rgb(63, 149, 162));
+        boton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                textViewNProductos.setText((++nProductosCesta).toString());
+                cesta.add(producto);
+            }
+        });
+
+        //ADD DE LOS VIEWS
+        cardview.addView(textview);
+        cardview.addView(precioview);
+        cardview.addView(logoview);
+        //cardview.addView(cantidadtext);
+        cardview.addView(boton);
+        cardview.addView(placeholderview);
+        layout.addView(cardview);
+    }
+
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.mybutton) {
+            Intent myIntent = new Intent(this, CartActivity.class);
+            startActivity(myIntent);
+        }/*
+        if (id == R.id.action_settings) {
+            return true;
+        }*/
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_camera) {
+            // Handle the camera action
+        } else if (id == R.id.nav_gallery) {
+
+        } else if (id == R.id.nav_slideshow) {
+
+        } else if (id == R.id.nav_manage) {
+
+        } else if (id == R.id.nav_share) {
+
+        } else if (id == R.id.nav_send) {
+
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 
 }
