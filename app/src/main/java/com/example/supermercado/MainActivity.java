@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -55,7 +56,7 @@ public class MainActivity extends AppCompatActivity{
     public static Integer nProductosCesta = 0;
 
     int nlistasLlenas = 0;
-    int nProductos = 0;
+    int nProductosCarrefour = 0;
     int nProductosAlcampo = 0;
     int nProductosEroski = 0;
 
@@ -68,7 +69,7 @@ public class MainActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setTitle("Buscador de productos");
+        setTitle("Búsqueda manual");
 
         textViewNProductos = (TextView) findViewById(R.id.textViewNProductos);
         textViewNProductos.setText(nProductosCesta.toString());
@@ -85,8 +86,25 @@ public class MainActivity extends AppCompatActivity{
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.bringToFront();
 
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+                int id = menuItem.getItemId();
 
+                if (id == R.id.busqueda_listas) {
+                    Intent i = new Intent(MainActivity.this, ListaActivity.class);
+                    MainActivity.this.startActivity(i);
+                } else if (id == R.id.busqueda_manual) {
 
+                } else if (id == R.id.otro) {
+
+                }
+
+                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+                drawer.closeDrawer(GravityCompat.START);
+                return true;
+            }
+        });
 
         context = getApplicationContext();
 
@@ -114,7 +132,7 @@ public class MainActivity extends AppCompatActivity{
                     productosCarrefour.clear();
                     productosAlcampo.clear();
                     productosEroski.clear();
-                    nProductos = 0;
+                    nProductosCarrefour = 0;
                     nProductosAlcampo = 0;
                     nProductosEroski = 0;
                     nlistasLlenas = 0;
@@ -254,15 +272,15 @@ public class MainActivity extends AppCompatActivity{
                         sb.append(str.charAt(j));
                     }
                     if(str.charAt(j+1)=='<' && str.charAt(j+2)=='/'){
-                        productosCarrefour.add(new Producto(sb.toString(),"","Carrefour",""));
-                        nProductos++;
+                        if(addProducts(productosCarrefour,new Producto(sb.toString(),"","Carrefour",""))) nProductosCarrefour++;
+                        //productosCarrefour.add(new Producto(sb.toString(),"","Carrefour",""));
                         sb.delete(0,sb.length());
                         if(str.charAt(j+75)=='o') {
                             for(int k=j+78;k<acaba;k++){ // Leer el precio
                                 if(str.charAt(k)!=' '){
                                     sb.append(str.charAt(k));
                                 }else{
-                                    productosCarrefour.get(nProductos-1).setPrecioString(sb.toString());
+                                    productosCarrefour.get(nProductosCarrefour-1).setPrecioString(sb.toString());
                                     sb.delete(0,sb.length());
                                     break;
                                 }
@@ -278,7 +296,7 @@ public class MainActivity extends AppCompatActivity{
                                     if (str.charAt(k) != ' ') {
                                         sb.append(str.charAt(k));
                                     } else {
-                                        productosCarrefour.get(nProductos-1).setPrecioString(sb.toString());
+                                        productosCarrefour.get(nProductosCarrefour-1).setPrecioString(sb.toString());
                                         sb.delete(0,sb.length());
                                         break;
                                     }
@@ -298,7 +316,7 @@ public class MainActivity extends AppCompatActivity{
     public void obtenerListaProductosAlcampo(String str){
         String lista = "";
         StringBuilder sb = new StringBuilder();
-        int acaba = str.length()-1300000; //TESTEAR EL NUMERO
+        int acaba = str.length()-300000; //TESTEAR EL NUMERO
         for(int i=3000;i<acaba;i++){ // Leer el HTML
             if(str.charAt(i+4)==':' && str.charAt(i+2)=='e' && str.charAt(i+3)=='\'' && str.charAt(i+1)=='m' && str.charAt(i+5)=='\''){
                 for(int j=i+6;j<acaba;j++){ // Leer el nombre del producto
@@ -313,8 +331,8 @@ public class MainActivity extends AppCompatActivity{
                         sb.append(str.charAt(j));
                     }
                     if(str.charAt(j+1)=='\''){
-                        productosAlcampo.add(new Producto(sb.toString(),"","Alcampo",""));
-                        nProductosAlcampo++;
+                        if(addProducts(productosAlcampo,new Producto(sb.toString(),"","Alcampo",""))) nProductosAlcampo++;
+                        //productosAlcampo.add(new Producto(sb.toString(),"","Alcampo",""));
                         sb.delete(0,sb.length());
                         if(str.charAt(j+50)=='\'') j--; // Calibrado de fallo de distancia al precio
                         for(int k=j+54;k<acaba;k++){ // Leer el precio
@@ -339,8 +357,6 @@ public class MainActivity extends AppCompatActivity{
     }
 
     public void obtenerListaProductosEroski(String str){
-        //productosEroski.add(new Producto("PRODUCTOEROSKI1","1,30","EroskiFake",""));
-
         String lista = "";
         StringBuilder sb = new StringBuilder();
         int acaba = str.length()-20; //TESTEAR EL NUMERO
@@ -349,8 +365,8 @@ public class MainActivity extends AppCompatActivity{
                 for(int j=i+9;j<acaba;j++){ // Leer el nombre del producto
                     sb.append(str.charAt(j));
                     if(str.charAt(j+1)=='\\'){
-                        productosEroski.add(new Producto(sb.toString(),"","Eroski",""));
-                        nProductosEroski++;
+                        if(addProducts(productosEroski,new Producto(sb.toString(),"","Eroski",""))) nProductosEroski++;
+                        //productosEroski.add(new Producto(sb.toString(),"","Eroski",""));
                         sb.delete(0,sb.length());
                         while(str.charAt(j)!='e') j++; // Calibrado de fallo de distancia al precio
                         for(int k=j+6;k<acaba;k++){ // Leer el precio
@@ -467,18 +483,24 @@ public class MainActivity extends AppCompatActivity{
         precioview.setPadding(250,335,230,30);
         precioview.setGravity(Gravity.CENTER);
 
-        /*
+/*
         //CANTIDAD
         EditText cantidadtext = new EditText(context);
-        cantidadtext.setText("1");
+
+        cantidadtext.setGravity(Gravity.CENTER);
         cantidadtext.setBackgroundColor(Color.rgb(229, 229, 229));
+        cantidadtext.setTextSize(15);
+        //cantidadtext.setTypeface(null, Typeface.BOLD);
         LayoutParams layoutparams4 = new LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-        //layoutparams4.setMargins(100,100,100,100);
-        layoutparams4.width = 200;
-        layoutparams4.height = 200;
+        layoutparams4.width = 90;
+        layoutparams4.height = 90;
+        layoutparams4.setMargins(805,250,25,25);
         cantidadtext.setLayoutParams(layoutparams4);
+        cantidadtext.setHeight(0);
+        cantidadtext.setPadding(0,0,0,0);
+        cantidadtext.setText("1");
         cantidadtext.bringToFront();
-        */
+*/
 
         //BOTON
         Button boton = new Button(context);
@@ -494,8 +516,7 @@ public class MainActivity extends AppCompatActivity{
         boton.setBackgroundColor(Color.rgb(63, 149, 162));
         boton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                textViewNProductos.setText((++nProductosCesta).toString());
-                cesta.add(producto);
+                if(addProducts(cesta,producto)) textViewNProductos.setText((++nProductosCesta).toString());
             }
         });
 
@@ -530,8 +551,8 @@ public class MainActivity extends AppCompatActivity{
         int id = item.getItemId();
 
         if (id == R.id.mybutton) {
-            Intent myIntent = new Intent(this, CartActivity.class);
-            startActivity(myIntent);
+            Intent myIntent = new Intent(MainActivity.this, CartActivity.class);
+            MainActivity.this.startActivity(myIntent);
         }/*
         if (id == R.id.action_settings) {
             return true;
@@ -540,27 +561,14 @@ public class MainActivity extends AppCompatActivity{
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+    public boolean addProducts(ArrayList<Producto> list, Producto product){
+        for(int i=0; i<list.size();i++){
+            if(list.get(i).getNombre().equals(product.getNombre()) && list.get(i).getPrecioString().equals(product.getPrecioString())){
+                list.get(i).setCantidad(list.get(i).getCantidad()+1);
+                        return false;
+            }
         }
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
+        list.add(product);
         return true;
     }
 

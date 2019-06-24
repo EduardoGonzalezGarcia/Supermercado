@@ -1,10 +1,12 @@
 package com.example.supermercado;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -23,18 +25,24 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 public class CartActivity extends AppCompatActivity {
 
     public static TextView textViewNProductos;
+    public static TextView textViewCestaVacia;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_cart);
         setTitle("Cesta de la compra");
 
+        textViewCestaVacia = (TextView) findViewById(R.id.textVacio);
         textViewNProductos = (TextView) findViewById(R.id.textViewNProductos);
         textViewNProductos.setText(MainActivity.nProductosCesta.toString());
+        final Context context = getApplicationContext();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -49,7 +57,27 @@ public class CartActivity extends AppCompatActivity {
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.bringToFront();
 
-        Context context = getApplicationContext();
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+                int id = menuItem.getItemId();
+
+                if (id == R.id.busqueda_listas) {
+                    Intent i = new Intent(CartActivity.this, ListaActivity.class);
+                    CartActivity.this.startActivity(i);
+                } else if (id == R.id.busqueda_manual) {
+                    Intent i = new Intent(CartActivity.this, MainActivity.class);
+                    CartActivity.this.startActivity(i);
+                } else if (id == R.id.otro) {
+
+                }
+
+                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+                drawer.closeDrawer(GravityCompat.START);
+                return true;
+            }
+        });
+
         LinearLayout.LayoutParams layoutparams;
 
         createCardViews(context);
@@ -59,6 +87,29 @@ public class CartActivity extends AppCompatActivity {
 
     private void createCardViews(Context context) {
         LinearLayout.LayoutParams layoutparams;
+
+        this.runOnUiThread(new Runnable(){
+            @Override
+            public void run() {
+                if(MainActivity.nProductosCesta>0) textViewCestaVacia.setVisibility(View.GONE);
+                else textViewCestaVacia.setVisibility(View.VISIBLE);
+            } });
+
+        ArrayList<Producto> cestaEroski = new ArrayList<Producto>();
+        ArrayList<Producto> cestaCarrefour = new ArrayList<Producto>();
+        ArrayList<Producto> cestaAlcampo = new ArrayList<Producto>();
+        for(int i = 0; i< MainActivity.cesta.size(); i++){
+            if("Carrefour".equals(MainActivity.cesta.get(i).getTienda())){
+                cestaCarrefour.add(MainActivity.cesta.get(i));
+            }
+            else if("Eroski".equals(MainActivity.cesta.get(i).getTienda())){
+                cestaEroski.add(MainActivity.cesta.get(i));
+            }
+            else if("Alcampo".equals(MainActivity.cesta.get(i).getTienda())){
+                cestaAlcampo.add(MainActivity.cesta.get(i));
+            }
+        }
+
         for(int i = 0; i< MainActivity.cesta.size(); i++){
             final Producto producto = MainActivity.cesta.get(i);
             int index = i;
@@ -131,6 +182,7 @@ public class CartActivity extends AppCompatActivity {
                     MainActivity.cesta.remove(producto);
                     textViewNProductos.setText((--MainActivity.nProductosCesta).toString());
                     layout.removeAllViews();
+                    layout.addView(textViewCestaVacia);
                     createCardViews(con);
                 }
             });
@@ -177,28 +229,5 @@ public class CartActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
-    }
 
 }

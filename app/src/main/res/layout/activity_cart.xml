@@ -14,9 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".CartActivity">
@@ -47,7 +45,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/editTextBuscar" />
 
-        <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        <ScrollView
             android:id="@+id/scrollViewCesta"
             android:layout_width="0dp"
             android:layout_height="0dp"
@@ -62,7 +60,22 @@
                 android:id="@+id/layoutCesta"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:stretchColumns="1"></RelativeLayout>
+                android:stretchColumns="1">
+
+                <TextView
+                    android:id="@+id/textVacio"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginStart="25dp"
+                    android:layout_marginLeft="25dp"
+                    android:layout_marginTop="188dp"
+                    android:layout_marginEnd="25dp"
+                    android:layout_marginRight="25dp"
+                    android:gravity="center_horizontal"
+                    android:text="Su cesta de la compra está vacía.\n¡Vuelva a la pantalla inicial para elegir productos!" />
+            </RelativeLayout>
         </ScrollView>
 
     </android.support.constraint.ConstraintLayout>
