@@ -32,11 +32,14 @@ public class ListaActivity extends AppCompatActivity {
     public static ArrayList<Button> botonesList;
     public static ArrayList<TextView> titulosList;
     public static ArrayList<Producto[]> ProductosFinales;
+    public static ArrayList<Producto> ProductosEroski;
+    public static ArrayList<Producto> ProductosCarrefour;
+    public static ArrayList<Producto> ProductosAlcampo;
+    public static ArrayList<Producto> ProductosEroskiCarrefour;
+    public static ArrayList<Producto> ProductosEroskiAlcampo;
+    public static ArrayList<Producto> ProductosCarrefourAlcampo;
+    public static ArrayList<Producto> ProductosEroskiCarrefourAlcampo;
     String name;
-    public static double totalPrecioEroski;
-    public static double totalPrecioCarrefour;
-    public static double totalPrecioAlcampo;
-    public static double precioMasBarato;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,9 +54,18 @@ public class ListaActivity extends AppCompatActivity {
             botonesList = new ArrayList<Button>();
             titulosList = new ArrayList<TextView>();
             ProductosFinales = new ArrayList<Producto[]>();
+            ProductosEroski = new ArrayList<Producto>();
+            ProductosCarrefour = new ArrayList<Producto>();
+            ProductosAlcampo = new ArrayList<Producto>();
+            ProductosEroskiCarrefour = new ArrayList<Producto>();
+            ProductosEroskiAlcampo = new ArrayList<Producto>();
+            ProductosCarrefourAlcampo = new ArrayList<Producto>();
+            ProductosEroskiCarrefourAlcampo = new ArrayList<Producto>();
             nProductosListaMostrados=0;
             nProductosLista=0;
         }
+
+
 
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -90,39 +102,81 @@ public class ListaActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                totalPrecioEroski=0;
-                totalPrecioCarrefour=0;
-                totalPrecioAlcampo=0;
-                precioMasBarato=0;
+                ProductosEroski.clear();
+                ProductosCarrefour.clear();
+                ProductosAlcampo.clear();
+                ProductosEroskiCarrefour.clear();
+                ProductosEroskiCarrefourAlcampo.clear();
+                ProductosEroskiAlcampo.clear();
+                ProductosCarrefourAlcampo.clear();
+                ProductosEroskiCarrefour.clear();
                 for(int i=0;i<ProductosFinales.size();i++){
-                    totalPrecioEroski += Double.parseDouble(ProductosFinales.get(i)[0].getPrecioString().replace(",", "."));
-                    totalPrecioCarrefour += Double.parseDouble(ProductosFinales.get(i)[1].getPrecioString().replace(",", "."));
-                    totalPrecioAlcampo += Double.parseDouble(ProductosFinales.get(i)[2].getPrecioString().replace(",", "."));
+                    ProductosEroski.add(ProductosFinales.get(i)[0]);
+                    ProductosCarrefour.add(ProductosFinales.get(i)[1]);
+                    ProductosAlcampo.add(ProductosFinales.get(i)[2]);
                     if(Double.parseDouble(ProductosFinales.get(i)[0].getPrecioString().replace(",", ".")) < Double.parseDouble(ProductosFinales.get(i)[1].getPrecioString().replace(",", "."))){
                         if(Double.parseDouble(ProductosFinales.get(i)[0].getPrecioString().replace(",", ".")) < Double.parseDouble(ProductosFinales.get(i)[2].getPrecioString().replace(",", "."))){
-                            precioMasBarato += Double.parseDouble(ProductosFinales.get(i)[0].getPrecioString().replace(",", "."));
+                            //Eroski mas barato
+                            ProductosEroskiAlcampo.add(ProductosFinales.get(i)[0]);
+                            ProductosEroskiCarrefour.add(ProductosFinales.get(i)[0]);
+                            ProductosEroskiCarrefourAlcampo.add(ProductosFinales.get(i)[0]);
+                            if(Double.parseDouble(ProductosFinales.get(i)[1].getPrecioString().replace(",", ".")) < Double.parseDouble(ProductosFinales.get(i)[2].getPrecioString().replace(",", "."))){
+                                ProductosCarrefourAlcampo.add(ProductosFinales.get(i)[1]);
+                            } else {
+                                ProductosCarrefourAlcampo.add(ProductosFinales.get(i)[2]);
+                            }
+
                         } else {
-                            precioMasBarato += Double.parseDouble(ProductosFinales.get(i)[2].getPrecioString().replace(",", "."));
+                            //Alcampo mas barato
+                            ProductosEroskiCarrefourAlcampo.add(ProductosFinales.get(i)[2]);
+                            ProductosEroskiAlcampo.add(ProductosFinales.get(i)[2]);
+                            ProductosCarrefourAlcampo.add(ProductosFinales.get(i)[2]);
+                            ProductosEroskiCarrefour.add(ProductosFinales.get(i)[0]);
                         }
                     } else {
                         if(Double.parseDouble(ProductosFinales.get(i)[1].getPrecioString().replace(",", ".")) < Double.parseDouble(ProductosFinales.get(i)[2].getPrecioString().replace(",", "."))){
-                            precioMasBarato += Double.parseDouble(ProductosFinales.get(i)[1].getPrecioString().replace(",", "."));
+                            //Carrefour mas barato
+                            ProductosCarrefourAlcampo.add(ProductosFinales.get(i)[1]);
+                            ProductosEroskiCarrefourAlcampo.add(ProductosFinales.get(i)[1]);
+                            ProductosEroskiCarrefour.add(ProductosFinales.get(i)[1]);
+                            if(Double.parseDouble(ProductosFinales.get(i)[0].getPrecioString().replace(",", ".")) < Double.parseDouble(ProductosFinales.get(i)[2].getPrecioString().replace(",", "."))){
+                                ProductosEroskiAlcampo.add(ProductosFinales.get(i)[0]);
+                            } else {
+                                ProductosEroskiAlcampo.add(ProductosFinales.get(i)[2]);
+                            }
                         } else {
-                            precioMasBarato += Double.parseDouble(ProductosFinales.get(i)[2].getPrecioString().replace(",", "."));
+                            //Alcampo mas barato
+                            ProductosEroskiCarrefourAlcampo.add(ProductosFinales.get(i)[2]);
+                            ProductosEroskiAlcampo.add(ProductosFinales.get(i)[2]);
+                            ProductosCarrefourAlcampo.add(ProductosFinales.get(i)[2]);
+                            ProductosEroskiCarrefour.add(ProductosFinales.get(i)[1]);
                         }
                     }
-                    System.out.println(ProductosFinales.get(i)[0].getTienda() + ": " + ProductosFinales.get(i)[0].getNombre() + " " + ProductosFinales.get(i)[0].getPrecioString() + "€");
-                    System.out.println(ProductosFinales.get(i)[1].getTienda() + ": " + ProductosFinales.get(i)[1].getNombre() + " " + ProductosFinales.get(i)[1].getPrecioString() + "€");
-                    System.out.println(ProductosFinales.get(i)[2].getTienda() + ": " + ProductosFinales.get(i)[2].getNombre() + " " + ProductosFinales.get(i)[2].getPrecioString() + "€");
-                    System.out.println("-");
                 }
-                System.out.println("Total precio Eroski = " + totalPrecioEroski);
-                System.out.println("Total precio Carrefour = " + totalPrecioCarrefour);
-                System.out.println("Total precio Alcampo = " + totalPrecioAlcampo);
-                System.out.println("Total precio más barato = " + precioMasBarato);
+                //ABRIR NUEVA ACTIVITY
+                if(!ProductosEroski.isEmpty()) {
+                    Intent i = new Intent(ListaActivity.this, opcionesActivity.class);
+                    ListaActivity.this.startActivity(i);
+                }
             }
         });
+    }
 
+    public double getPrecioDeCesta(ArrayList<Producto> cesta){
+        double precio=0;
+        for(Producto prod: cesta){
+            precio+=Double.parseDouble(prod.getPrecioString().replace(",", "."));
+        }
+        return precio;
+    }
+
+    public boolean tiendaCheck(ArrayList<Producto> cesta, String tienda){
+        for(Producto prod: cesta){
+            if(prod.getTienda().equals(tienda)){
+                return true;
+            }
+        }
+        return false;
     }
 
     public void createAddListItem(int pos){
